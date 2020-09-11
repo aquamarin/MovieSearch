@@ -7,13 +7,53 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <form id="form_id">
-      <input type="text" id="movieName" value="" />
-      <button type="button">Ara</button>
-    </form>
-
-    <ul id="movieList"></ul>
-
+    <div class="container is-fluid mt-6">
+      <nav class="level">
+        <form id="form_id" class="level-item">
+          <div class="field has-addons">
+            <p class="control">
+              <input
+                class="input"
+                type="text"
+                id="movieName"
+                value=""
+                placeholder="Film adını yazınız"
+              />
+            </p>
+            <p class="control">
+              <button class="button" type="button">Ara</button>
+            </p>
+          </div>
+        </form>
+      </nav>
+      <div id="movieList" class="columns is-multiline">
+        <!-- <div class="column is-3">
+          <div class="card">
+            <div class="card-image">
+              <figure class="image">
+                <img src="%poster" />
+              </figure>
+            </div>
+            <div class="card-content">
+              <div class="media">
+                <div class="media-content">
+                  <p class="title is-4">%title%</p>
+                </div>
+              </div>
+              <footer class="card-footer">
+                <p class="card-footer-item">%year</p>
+                <p class="card-footer-item">Favori icon</p>
+              </footer>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
+      integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.js"
       integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="

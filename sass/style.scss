@@ -35,5 +35,17 @@ $input-shadow: none;
 @import "../bulma-0.9.0/sass/elements/title.sass";
 @import "../bulma-0.9.0/sass/form/_all.sass";
 @import "../bulma-0.9.0/sass/components/navbar.sass";
-@import "../bulma-0.9.0/sass/layout/hero.sass";
+@import "../bulma-0.9.0/sass/layout/_all.sass";
 @import "../bulma-0.9.0/sass/layout/section.sass";
+@import "../bulma-0.9.0/sass/components/_all.sass";
+@import "../bulma-0.9.0/sass/elements/_all.sass";
+@import "../bulma-0.9.0/sass/grid/_all.sass";
+@import "../bulma-0.9.0/sass/helpers/_all.sass";
+@import "../bulma-0.9.0/sass/layout/_all.sass";
+
+
+.card{
+    .card-content{
+        padding-bottom: 0;
+    }
+}
