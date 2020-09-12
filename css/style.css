@@ -9601,6 +9601,12 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
   background-color: #fafafa;
   padding: 3rem 1.5rem 6rem; }
 
+.container nav .searchBox {
+  margin-top: 30px; }
+  .container nav .searchBox .box {
+    margin-right: 10px; }
+  .container nav .searchBox :not(:last-child) {
+    margin-bottom: 0; }
 .container div#movieList .card .card-content {
   padding-bottom: 0; }
   .container div#movieList .card .card-content footer.card-footer p span.icon {

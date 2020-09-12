@@ -2,16 +2,17 @@ var form = $("#form_id");
 var movieList = $("#movieList");
 var searchButton = $(".searchButton");
 var movieName = $("#movieName");
+var searchName = $(".searchBox");
 var searchItems = [];
 
 var getData = function () {
   axios
     .get("http://www.omdbapi.com/?s=" + movieName.val() + "&apikey=b9af8b2e")
     .then(function (response) {
+      console.log(movieName.val());
       var res = response.data;
-      
-      FuncForLocalStorage.search(movieName.val());
 
+      FuncForLocalStorage.search(movieName.val());
       movieList.empty();
       movieName.val("");
 
@@ -39,6 +40,11 @@ var setEventHandlers = function () {
       getData();
     }
   });
+  $(".closeIcon").click(function () {
+    var delItem = $(this).parent().parent().attr("key");
+    FuncForLocalStorage.deleteItem(delItem);
+    displaySearchItems(searchItems);
+  });
 };
 var addItem = function (data) {
   var html, newHtml;
@@ -58,9 +64,9 @@ var addItem = function (data) {
         <footer class="card-footer">
           <p class="card-footer-item">%year%</p>
           <p class="card-footer-item">
-            <button class="icon" type="button">
+            <span class="icon">
               <i class="far fa-heart" aria-hidden="true"></i>
-            </button>
+            </span>
           </p>
         </footer>
       </div>
@@ -76,6 +82,29 @@ var addItem = function (data) {
   newHtml = newHtml.replace(/%title%/, data.Title);
   newHtml = newHtml.replace(/%year%/, data.Year);
   movieList.append(newHtml);
+};
+
+var displaySearchItems = function (searchItems) {
+  searchItems.forEach(function (item) {
+    var itemID, itemName, box;
+    itemID = item.id;
+    itemName = item.name;
+
+    box =
+      `<div key="` +
+      itemID +
+      `" class="box column is-one-quarter">
+            <div class="tile">
+            <p> ` +
+      itemName +
+      `</p>
+            <span class="closeIcon">
+              <i class="fas fa-times"></i>
+            </span>
+          </div>
+        </div>`;
+    searchName.prepend(box);
+  });
 };
 
 var FuncForLocalStorage = (function () {
@@ -128,8 +157,10 @@ var FuncForLocalStorage = (function () {
 
 var appController = {
   init: function () {
-    if (FuncForLocalStorage.getLocalStorage() !== null) {
-      searchItems = FuncForLocalStorage.getLocalStorage();
+    var FFLStorage = FuncForLocalStorage;
+    if (FFLStorage.getLocalStorage() !== null) {
+      searchItems = FFLStorage.getLocalStorage();
+      displaySearchItems(searchItems);
     }
     return setEventHandlers();
   },
