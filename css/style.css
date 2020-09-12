@@ -9605,6 +9605,12 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
   margin-top: 30px; }
   .container nav .searchBox .box {
     margin-right: 10px; }
+    .container nav .searchBox .box .tile {
+      justify-content: center;
+      position: relative; }
+      .container nav .searchBox .box .tile span {
+        position: absolute;
+        right: 0; }
   .container nav .searchBox :not(:last-child) {
     margin-bottom: 0; }
 .container div#movieList .card .card-content {

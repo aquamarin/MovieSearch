@@ -29,6 +29,16 @@
 
             .box {
                 margin-right: 10px;
+
+                .tile {
+                    justify-content: center;
+                    position: relative;
+
+                    span {
+                        position: absolute;
+                        right: 0;
+                    }
+                }
             }
 
             :not(:last-child) {

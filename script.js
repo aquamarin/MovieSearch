@@ -85,6 +85,8 @@ var addItem = function (data) {
 };
 
 var displaySearchItems = function (searchItems) {
+  //aynı ögelerin tekrar etmemesi için display etmeden önce temizliyoruz.
+  searchName.children().remove();
   searchItems.forEach(function (item) {
     var itemID, itemName, box;
     itemID = item.id;
@@ -99,7 +101,7 @@ var displaySearchItems = function (searchItems) {
       itemName +
       `</p>
             <span class="closeIcon">
-              <i class="fas fa-times"></i>
+              <i class="fas fa-times fa-2x"></i>
             </span>
           </div>
         </div>`;
@@ -144,6 +146,7 @@ var FuncForLocalStorage = (function () {
       };
       searchItems.push(search);
       setItemLocalStorage(searchItems);
+      displaySearchItems(searchItems);
     },
 
     getLocalStorage: function () {
@@ -151,6 +154,7 @@ var FuncForLocalStorage = (function () {
     },
     deleteItem: function (id) {
       deleteSearchItem(id);
+      displaySearchItems(searchItems);
     },
   };
 })();
