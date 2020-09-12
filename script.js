@@ -1,20 +1,21 @@
 var form = $("#form_id");
 var movieList = $("#movieList");
 var searchButton = $(".searchButton");
-var movieName = $("#movieName");
+var itemName = $("#inputName");
 var searchName = $(".searchBox");
 var searchItems = [];
 
-var getData = function () {
+var getData = function (data) {
+  searchData = data ? data : itemName.val();
   axios
-    .get("http://www.omdbapi.com/?s=" + movieName.val() + "&apikey=b9af8b2e")
+    .get("http://www.omdbapi.com/?s=" + searchData + "&apikey=b9af8b2e")
     .then(function (response) {
-      console.log(movieName.val());
+      console.log(searchData);
       var res = response.data;
 
-      FuncForLocalStorage.search(movieName.val());
+      FuncForLocalStorage.search(searchData);
       movieList.empty();
-      movieName.val("");
+      itemName.val("");
 
       res.Search.forEach(function (list) {
         addItem(list);
@@ -30,20 +31,33 @@ var getData = function () {
       });
     });
 };
-
+var controlSearchInput = function () {
+  var character = itemName.val().length;
+  if (character >= 3) {
+    itemName.removeClass("is-danger");
+    getData()
+  } else {
+    itemName.toggleClass("is-danger");
+    
+  }
+};
 var setEventHandlers = function () {
-  searchButton.click(getData);
+  searchButton.click(controlSearchInput);
 
   $(document).keypress(function (event) {
     if (event.keyCode == "13" || event.which == "13") {
       event.preventDefault();
-      getData();
+      controlSearchInput();
     }
   });
   $(".closeIcon").click(function () {
     var delItem = $(this).parent().parent().attr("key");
     FuncForLocalStorage.deleteItem(delItem);
     displaySearchItems(searchItems);
+  });
+  $(".box").click(function () {
+    var movieData = $(this).find("p").text().trim();
+    getData(movieData);
   });
 };
 var addItem = function (data) {
@@ -119,6 +133,7 @@ var FuncForLocalStorage = (function () {
     }
     deleteLocalStorage();
     setItemLocalStorage(searchItems);
+    displaySearchItems(searchItems);
   };
 
   var setItemLocalStorage = function (obj) {
@@ -146,6 +161,9 @@ var FuncForLocalStorage = (function () {
       };
       searchItems.push(search);
       setItemLocalStorage(searchItems);
+      if (searchItems.length > 10) {
+        deleteSearchItem(searchItems[0].id);
+      }
       displaySearchItems(searchItems);
     },
 
@@ -154,7 +172,6 @@ var FuncForLocalStorage = (function () {
     },
     deleteItem: function (id) {
       deleteSearchItem(id);
-      displaySearchItems(searchItems);
     },
   };
 })();

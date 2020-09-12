@@ -9604,7 +9604,8 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
 .container nav .searchBox {
   margin-top: 30px; }
   .container nav .searchBox .box {
-    margin-right: 10px; }
+    margin-right: 10px;
+    cursor: pointer; }
     .container nav .searchBox .box .tile {
       justify-content: center;
       position: relative; }
