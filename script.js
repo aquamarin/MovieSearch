@@ -32,8 +32,31 @@ var setEventHandlers = function () {
 };
 var addItem = function (data) {
   var html, newHtml;
-  html =
-    '<div class="column is-3"><div class="card"><div class="card-image"><figure class="image is-4by5"> <img src="%poster%" /> </figure> </div> <div class="card-content"> <div class="media"><div class="media-content"> <p class="title is-4">%title%</p></div>  </div><footer class="card-footer"><p class="card-footer-item">%year%</p><p class="card-footer-item"><span class="icon"><i class="far fa-heart" aria-hidden="true"></i></span></p></footer></div></div></div>';
+  html = 
+  `<div class="column is-3">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-4by5"> 
+          <img src="%poster%" /> 
+        </figure> 
+      </div> 
+      <div class="card-content"> 
+        <div class="media">
+          <div class="media-content"> 
+            <p class="title is-4">%title%</p>
+          </div>  
+        </div>
+        <footer class="card-footer">
+          <p class="card-footer-item">%year%</p>
+          <p class="card-footer-item">
+            <span class="icon">
+              <i class="far fa-heart" aria-hidden="true"></i>
+            </span>
+          </p>
+        </footer>
+      </div>
+    </div>
+  </div>`;
 
   // eğer datada poster, Poster: "N/A" ise boş gelmemesini sağlıyoruz.
   if (data.Poster === "N/A") {
