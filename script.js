@@ -2,20 +2,30 @@ var form = $("#form_id");
 var movieList = $("#movieList");
 var searchButton = $(".searchButton");
 var movieName = $("#movieName");
+var searchItems = [];
 
 var getData = function () {
-  console.log(movieName);
   axios
     .get("http://www.omdbapi.com/?s=" + movieName.val() + "&apikey=b9af8b2e")
     .then(function (response) {
       var res = response.data;
-      console.log(res);
+      
+      FuncForLocalStorage.search(movieName.val());
 
       movieList.empty();
       movieName.val("");
 
       res.Search.forEach(function (list) {
         addItem(list);
+      });
+      // addItem ile iconun olduğu yer eklendiği için event burada çağrılmalıdır.
+      $(".icon").click(function () {
+        var isFarOrFas = $(this).find("svg");
+        if (isFarOrFas.attr("data-prefix") == "far") {
+          isFarOrFas.attr("data-prefix", "fas");
+        } else {
+          isFarOrFas.attr("data-prefix", "far");
+        }
       });
     });
 };
@@ -32,8 +42,7 @@ var setEventHandlers = function () {
 };
 var addItem = function (data) {
   var html, newHtml;
-  html = 
-  `<div class="column is-3">
+  html = `<div class="column is-3">
     <div class="card">
       <div class="card-image">
         <figure class="image is-4by5"> 
@@ -49,9 +58,9 @@ var addItem = function (data) {
         <footer class="card-footer">
           <p class="card-footer-item">%year%</p>
           <p class="card-footer-item">
-            <span class="icon">
+            <button class="icon" type="button">
               <i class="far fa-heart" aria-hidden="true"></i>
-            </span>
+            </button>
           </p>
         </footer>
       </div>
@@ -66,13 +75,62 @@ var addItem = function (data) {
   }
   newHtml = newHtml.replace(/%title%/, data.Title);
   newHtml = newHtml.replace(/%year%/, data.Year);
-  // favori icon değişimi
-  // dolu kalp icon classı : fa fa-heart
   movieList.append(newHtml);
 };
 
+var FuncForLocalStorage = (function () {
+  //id yi alıp aynı idye sahip olan objeyi siliyor
+  var deleteSearchItem = function (id) {
+    for (var i = 0; i < searchItems.length; i++) {
+      if (searchItems[i].id == id) {
+        searchItems.splice($.inArray(searchItems[i], searchItems), 1);
+      }
+    }
+    deleteLocalStorage();
+    setItemLocalStorage(searchItems);
+  };
+
+  var setItemLocalStorage = function (obj) {
+    localStorage.setItem("searchWords", JSON.stringify(obj));
+  };
+  var deleteLocalStorage = function () {
+    localStorage.removeItem("searchWords");
+  };
+
+  var uuidv4 = function () {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (
+      c
+    ) {
+      var r = (Math.random() * 16) | 0,
+        v = c == "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
+  return {
+    // aranan kelimeyi setItems arrayıne obje olarak ekliyor
+    search: function (word) {
+      var search = {
+        id: uuidv4(),
+        name: word,
+      };
+      searchItems.push(search);
+      setItemLocalStorage(searchItems);
+    },
+
+    getLocalStorage: function () {
+      return JSON.parse(localStorage.getItem("searchWords"));
+    },
+    deleteItem: function (id) {
+      deleteSearchItem(id);
+    },
+  };
+})();
+
 var appController = {
   init: function () {
+    if (FuncForLocalStorage.getLocalStorage() !== null) {
+      searchItems = FuncForLocalStorage.getLocalStorage();
+    }
     return setEventHandlers();
   },
 };

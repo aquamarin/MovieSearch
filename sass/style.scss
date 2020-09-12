@@ -22,9 +22,29 @@
 @import "../bulma-0.9.0/sass/helpers/_all.sass";
 @import "../bulma-0.9.0/sass/layout/_all.sass";
 
+.container {
+    nav {}
 
-.card{
-    .card-content{
-        padding-bottom: 0;
+    div#movieList {
+        .card {
+            .card-image {}
+
+            .card-content {
+                padding-bottom: 0;
+
+                .media{}
+
+                footer.card-footer{
+                    p{
+                        span.icon{
+                            cursor: pointer;
+                            i{}
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
+
