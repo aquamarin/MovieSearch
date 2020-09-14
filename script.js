@@ -68,10 +68,7 @@ var setRecursiveFunc = function () {
 
   // önceden aratılmış olan ögeler listesinden eleman çıkarmak için.
   $(".closeIcon").click(function () {
-    var delItem = $(this).closest(".searchItem").attr("key");
-    searchList = doms.searchList.filter((obj) => obj.id !== delItem);
-    //displaySearchItems(searchItems);
-    storage.setItem(doms.keyForSearch, searchList);
+    
   });
 
   //önceden aratılmış olan ögeler listesindeki herhangi bir ögeye
@@ -91,7 +88,7 @@ var appController = {
     this.apiKey = "b9af8b2e";
     this.apiRoot = "http://www.omdbapi.com/";
     this.movies = [];
-    this.searchItems = storage.getItem("searchList") || [];
+    this.searchItems = storage.getItem("searchWords") || [];
     this.favoritesList = storage.getItem("favoritesList") || [];
   },
   onload: function () {
@@ -106,13 +103,25 @@ var appController = {
       favoriteName: $("#favoritesList"),
     };
     this.bindActions();
+    this.displaySearchItems();
   },
   bindActions: function () {
     this.doms.searchForm.on("submit", this.searchSubmit.bind(this));
+    this.doms.searchList.on(
+      "click",
+      ".closeIcon",
+      this.handleSearchDelete.bind(this)
+    );
   },
-  searchSubmit: function (e) {
-    console.log(e.target);
-    e.preventDefault();
+  handleSearchDelete: function (event) {
+    var delItem = $(event.target).closest(".searchItem").attr("key");
+    this.searchItems = this.searchItems.filter((obj) => obj.id !== delItem);
+    this.displaySearchItems();
+    storage.setItem(this.doms.keyForSearch, this.searchItems);
+  },
+  searchSubmit: function (event) {
+    console.log(event.target);
+    event.preventDefault();
     var searchData = this.doms.itemName.val();
     this.getData(searchData);
   },
@@ -126,7 +135,7 @@ var appController = {
 
         //aratılan kelimeyi local Storage eklemek için
         this.search(data);
-       
+
         //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
         this.doms.movieList.empty();
         this.doms.itemName.val("");
@@ -175,17 +184,16 @@ var appController = {
   },
 
   search: function (word) {
-    var search = {
+    this.searchItems.push({
       id: uuidv4(),
       name: word,
-    };
-    this.searchItems.push(search);
-    storage.setItem(this.doms.keyForSearch, this.searchItems);
+    });
     if (this.searchItems.length > 10) {
       console.log(this.searchItems);
       this.searchItems.shift();
     }
-    this.displaySearchItems(this.searchItems);
+    storage.setItem(this.doms.keyForSearch, this.searchItems);
+    this.displaySearchItems();
   },
   // Search edilen ögelerin görüntülenmesi için.
   displaySearchItems: function () {
