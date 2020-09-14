@@ -19,41 +19,6 @@ var storage = {
   },
 };
 
-/*
-//sayfa yüklendikten sonra ekelenen ögelerin eventlerini
-//aktif etmek için kullanılan fonksiyon
-var setRecursiveFunc = function () {
-  // favori (kalp iconu) tıklandıgında icon değişimi yapılmasını sağlıyor
-  $(".icon").click(function () {
-    var isFarOrFas = $(this).find("svg");
-    var Etarget;
-    if (isFarOrFas.attr("data-prefix") == "far") {
-      isFarOrFas.attr("data-prefix", "fas");
-      //icona tıklanıp favori listesine eklemnesi için.
-      Etarget = $(this).parents(".column");
-      var id = uuidv4();
-      var favorite = {
-        id: id,
-        div: Etarget,
-      };
-      favoritesList.push(favorite);
-      storage.setItem(doms.keyForFavorites, favoritesList);
-      //addItem(favoriteName);
-    } else {
-      isFarOrFas.attr("data-prefix", "far");
-      //favori listesinden elemanı çıkarmak için
-      Etarget = $(this).parents(".column");
-      FuncForLocalStorage.deleteItem(
-        doms.keyForFavorites,
-        Etarget.attr("id"),
-        favoritesList
-      );
-    }
-  });
-};
-
-*/
-
 var appController = {
   init: function () {
     this.apiKey = "b9af8b2e";
@@ -65,13 +30,12 @@ var appController = {
   onload: function () {
     this.doms = {
       searchForm: $("#searchForm"),
-      movieList: $("#movieList"),
       submit: $("#submit"),
+      movieList: $("#movieList"),
       itemName: $("#inputName"),
       searchList: $(".searchBox"),
       keyForSearch: "searchWords",
-      keyForFavorites: "favorites",
-      favoriteName: $("#favoritesList"),
+      favoritesList: $("#favoritesList"),
     };
     this.bindActions();
     this.displaySearchItems();
@@ -84,6 +48,34 @@ var appController = {
       this.handleSearchDelete.bind(this)
     );
     this.doms.searchList.on("click", "p", this.handleSearchClick.bind(this));
+    // hem movie listsindeki icona tıklayınca hemde favori listesindeki
+    //iconu tıklayınca handle favorite çalışmalı
+    this.doms.movieList.on(
+      "click",
+      ".favorite",
+      this.handleFavorite.bind(this)
+    );
+    this.doms.favoritesList.on(
+      "click",
+      ".favorite",
+      this.handleFavorite.bind(this)
+    );
+  },
+  handleFavorite: function (event) {
+    var key = $(event.target).closest(".movieItem").attr("key");
+    console.log(key);
+    var isFavorite = this.favoritesList.find((obj) => obj.imdbID === key);
+
+    if (isFavorite) {
+      this.favoritesList = this.favoritesList.filter(
+        (obj) => obj.imdbID !== key
+      );
+    } else {
+      var movie = this.movies.find((obj) => obj.imdbID === key);
+      this.favoritesList.push(movie);
+    }
+    storage.setItem("favoritesList", this.favoritesList);
+    this.displayFavorites();
   },
   handleSearchDelete: function (event) {
     var delItem = $(event.target).closest(".searchItem").attr("key");
@@ -107,8 +99,8 @@ var appController = {
     axios
       .get(`${this.apiRoot}?s=${data}&apiKey=${this.apiKey}`)
       .then((response) => {
-        this.movies = response.data;
-
+        this.movies = response.data.Search;
+        console.log(this.movies.Search);
         //aratılan kelimeyi local Storage eklemek için
         this.search(data);
 
@@ -117,14 +109,15 @@ var appController = {
         this.doms.itemName.val("");
 
         //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
-        this.movies.Search.forEach((list) => {
-          this.addItem(list);
+        this.movies.forEach((list) => {
+          var movie=this.addItem(list);
+          this.doms.movieList.append(movie);
         });
       });
   },
   // forEach ile gelen datanın html eklenmesini sağlıyor.
   addItem: function (data) {
-    var html = `<div class="column is-3">
+    var html = `<div class="movieItem column is-3" key=%key%>
     <div class="card">
       <div class="card-image">
         <figure class="image is-4by5"> 
@@ -139,15 +132,19 @@ var appController = {
         </div>
         <footer class="card-footer">
           <p class="card-footer-item">%year%</p>
-          <p class="card-footer-item">
+          <p class="card-footer-item favorite">
             <span class="icon">
-              <i class="far fa-heart" aria-hidden="true"></i>
+              <i class="%icon%" aria-hidden="true"></i>
             </span>
           </p>
         </footer>
       </div>
     </div>
   </div>`;
+
+    //imdbID zaten data ile gelen unique bir sayı oldugu için
+    //tekrar uuidv4 kullamaya gerek yok.
+    html = html.replace(/%key%/, data.imdbID);
     // eğer datada poster, Poster: "N/A" ise boş gelmemesini sağlıyoruz.
     html = html.replace(
       /%poster%/,
@@ -155,8 +152,13 @@ var appController = {
     );
     html = html.replace(/%title%/, data.Title);
     html = html.replace(/%year%/, data.Year);
-
-    this.doms.movieList.append(html);
+    //yukarıda eklediğimiz imbdID ile iconun classını değiştireğiz
+    var isFavorite = this.favoritesList.find(
+      (obj) => obj.imdbID === data.imdbID
+    );
+    html = html.replace(/%icon%/, isFavorite ? "fas fa-heart" : "far fa-heart");
+    return html;
+    
   },
 
   search: function (word) {
@@ -187,6 +189,13 @@ var appController = {
       html = html.replace(/%key%/, item.id);
       html = html.replace(/%name%/, item.name);
       this.doms.searchList.prepend(html);
+    });
+  },
+  displayFavorites: function () {
+    this.doms.favoritesList.empty();
+    this.favoritesList.forEach((data) => {
+      var item = this.addItem(data);
+      this.doms.favoritesList.append(item);
     });
   },
 };
