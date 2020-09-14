@@ -28,29 +28,6 @@ var storage = {
     return JSON.parse(localStorage.getItem(key));
   },
 };
-//inputa yazılan ya da önceden aratılmış kelimelerden seçilen elemana göre apiden axios ile
-// veriyi alıyoruz
-var getData = function (data) {
-  axios
-    .get("http://www.omdbapi.com/?s=" + data + "&apikey=b9af8b2e")
-    .then(function (response) {
-      var res = response.data;
-
-      //aratılan kelimeyi local Storage eklemek için
-      //storage.search(data);
-
-      //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
-      doms.movieList.empty();
-      doms.itemName.val("");
-
-      //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
-      res.Search.forEach(function (list) {
-        addItem(doms.movieList, list);
-      });
-
-      setRecursiveFunc();
-    });
-};
 
 //search inputu için yerteri kadar karakter yazılıp yazılmadığının kontrolu yapılıyor.
 var controlSearchInput = function () {
@@ -191,6 +168,9 @@ var search = function (word) {
 
 var appController = {
   init: function () {
+    this.apiKey = "b9af8b2e";
+    this.apiRoot = "http://www.omdbapi.com/";
+    this.movies = [];
     this.searchItems = storage.getItem("searchList") || [];
     this.favoritesList = storage.getItem("favoritesList") || [];
     if (storage.getItem(doms.keyForSearch) !== null) {
@@ -215,10 +195,31 @@ var appController = {
     this.doms.searchForm.on("submit", this.searchSubmit.bind(this));
   },
   searchSubmit: function (e) {
-    console.log(e.target)
+    console.log(e.target);
     e.preventDefault();
     var searchData = this.doms.itemName.val();
-    getData(searchData);
+    this.getData(searchData);
+  },
+  //inputa yazılan ya da önceden aratılmış kelimelerden seçilen elemana göre apiden axios ile
+  // veriyi alıyoruz
+  getData: function (data) {
+    axios
+      .get(`${this.apiRoot}?s=${data}&apiKey=${this.apiKey}`)
+      .then(function (response) {
+         this.movies = response.data;
+
+        //aratılan kelimeyi local Storage eklemek için
+        //storage.search(data);
+
+        //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
+        doms.movieList.empty();
+        doms.itemName.val("");
+
+        //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
+        movies.Search.forEach(function (list) {
+          addItem(doms.movieList, list);
+        });
+      });
   },
 };
 
