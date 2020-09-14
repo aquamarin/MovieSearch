@@ -1,4 +1,4 @@
-var DOMStrings = {
+var doms = {
   movieList: $("#movieList"),
   searchButton: $(".searchButton"),
   itemName: $("#inputName"),
@@ -7,8 +7,7 @@ var DOMStrings = {
   keyForFavorites: "favorites",
   favoriteName: $("#favoritesList"),
 };
-var searchItems = [];
-var favoritesList = [];
+
 // bu fonksiyon localStoragede tutulan ögeler için id oluşturuyor.
 var uuidv4 = function () {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -21,22 +20,22 @@ var uuidv4 = function () {
 //inputa yazılan ya da önceden aratılmış kelimelerden seçilen elemana göre apiden axios ile
 // veriyi alıyoruz
 var getData = function (data) {
-  var searchData = data ? data : DOMStrings.itemName.val();
+  var searchData = data ? data : doms.itemName.val();
   axios
     .get("http://www.omdbapi.com/?s=" + searchData + "&apikey=b9af8b2e")
     .then(function (response) {
       var res = response.data;
 
       //aratılan kelimeyi local Storage eklemek için
-      FuncForLocalStorage.search(searchData);
+      storage.search(searchData);
 
       //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
-      DOMStrings.movieList.empty();
-      DOMStrings.itemName.val("");
+      doms.movieList.empty();
+      doms.itemName.val("");
 
       //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
       res.Search.forEach(function (list) {
-        addItem(DOMStrings.movieList, list);
+        addItem(doms.movieList, list);
       });
 
       setRecursiveFunc();
@@ -45,11 +44,11 @@ var getData = function (data) {
 
 //search inputu için yerteri kadar karakter yazılıp yazılmadığının kontrolu yapılıyor.
 var controlSearchInput = function () {
-  if (DOMStrings.itemName.val().length >= 3) {
-    DOMStrings.itemName.removeClass("is-danger");
+  if (doms.itemName.val().length >= 3) {
+    doms.itemName.removeClass("is-danger");
     return true;
   } else {
-    DOMStrings.itemName.addClass("is-danger");
+    doms.itemName.addClass("is-danger");
     return false;
   }
 };
@@ -67,7 +66,7 @@ var setEventHandlers = function () {
       }
     }
   });
-  DOMStrings.searchButton.click(function () {
+  doms.searchButton.click(function () {
     if (flag) {
       getData();
     }
@@ -95,7 +94,7 @@ var setRecursiveFunc = function () {
       };
       favoritesList.push(favorite);
       displayFavoriteItems(favoritesList);
-      FuncForLocalStorage.setItem(DOMStrings.keyForFavorites, favoritesList);
+      storage.setItem(doms.keyForFavorites, favoritesList);
       //addItem(favoriteName);
     } else {
       isFarOrFas.attr("data-prefix", "far");
@@ -103,7 +102,7 @@ var setRecursiveFunc = function () {
       //favori listesinden elemanı çıkarmak için
       Etarget = $(this).parents(".column");
       FuncForLocalStorage.deleteItem(
-        DOMStrings.keyForFavorites,
+        doms.keyForFavorites,
         Etarget.attr("id"),
         favoritesList
       );
@@ -113,10 +112,9 @@ var setRecursiveFunc = function () {
   // önceden aratılmış olan ögeler listesinden eleman çıkarmak için.
   $(".closeIcon").click(function () {
     var delItem = $(this).closest(".searchItem").attr("key");
-    DOMStrings.searchList = DOMStrings.searchList.filter(
-      (obj) => obj.id !== delItem
-    );
+    searchList = doms.searchList.filter((obj) => obj.id !== delItem);
     displaySearchItems(searchItems);
+    storage.setItem(doms.keyForSearch, searchList);
   });
 
   //önceden aratılmış olan ögeler listesindeki herhangi bir ögeye
@@ -169,8 +167,9 @@ var addItem = function (list, data) {
 // Search edilen ögelerin görüntülenmesi için.
 var displaySearchItems = function (searchItems) {
   //aynı ögelerin tekrar etmemesi için display etmeden önce temizliyoruz.
-  DOMStrings.searchList.children().remove();
-  searchItems.forEach(function (item) {
+  doms.searchList.empty();
+  console.log(searchItems);
+  this.searchItems.forEach(function (item) {
     var html = `<div key="%key%" class="searchItem box column is-one-quarter">
           <div class="tile">
             <p>%name%</p>
@@ -181,19 +180,19 @@ var displaySearchItems = function (searchItems) {
         </div>`;
     html = html.replace(/%key%/, item.id);
     html = html.replace(/%name%/, item.name);
-    DOMStrings.searchList.prepend(html);
+    doms.searchList.prepend(html);
   });
   setRecursiveFunc();
 };
 displayFavoriteItems = function (favoriteItems) {
-  DOMStrings.favoriteName.children().remove();
+  doms.favoriteName.children().remove();
   favoriteItems.forEach(function (item) {
     var itemID, itemDiv;
     itemID = item.id;
     itemDiv = item.div;
     itemDiv.attr("id", itemID);
-    itemDiv.clone().appendTo(DOMStrings.favoriteName);
-    //DOMStrings.favoriteName.prepend(itemDiv);
+    itemDiv.clone().appendTo(doms.favoriteName);
+    //doms.favoriteName.prepend(itemDiv);
   });
   setRecursiveFunc();
 };
@@ -207,14 +206,15 @@ var storage = {
       name: word,
     };
     searchItems.push(search);
-    setItem(DOMStrings.keyForSearch, searchItems);
+    this.setItem(doms.keyForSearch, searchItems);
     if (searchItems.length > 10) {
-      DOMStrings.searchList.shift();
+      console.log(searchItems);
+      searchItems.shift();
     }
     displaySearchItems(searchItems);
   },
 
-  getLocalStorage: function (key) {
+  getItem: function (key) {
     return JSON.parse(localStorage.getItem(key));
   },
   setItem: function (key, obj) {
@@ -224,12 +224,29 @@ var storage = {
 
 var appController = {
   init: function () {
-    if (storage.getLocalStorage(DOMStrings.keyForSearch) !== null) {
-      searchItems = storage.getLocalStorage(DOMStrings.keyForSearch);
+    this.searchItems = storage.getItem("searchList") || [];
+    this.favoritesList = storage.getItem("favoritesList") || [];
+    if (storage.getItem(doms.keyForSearch) !== null) {
+      searchItems = storage.getItem(doms.keyForSearch);
       displaySearchItems(searchItems);
     }
     return setEventHandlers();
   },
+  onload: function () {
+    this.doms = {
+      movieList: $("#movieList"),
+      searchButton: $(".searchButton"),
+      itemName: $("#inputName"),
+      searchList: $(".searchBox"),
+      keyForSearch: "searchWords",
+      keyForFavorites: "favorites",
+      favoriteName: $("#favoritesList"),
+    };
+  },
 };
 
 appController.init();
+
+$(document).ready(function () {
+  appController.onload();
+});
