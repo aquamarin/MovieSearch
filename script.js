@@ -75,7 +75,8 @@ var appController = {
       this.favoritesList.push(movie);
     }
     storage.setItem("favoritesList", this.favoritesList);
-    this.displayFavorites();
+    // movielist ve favorilist tekrar beraber render ediliyor
+    this.render();
   },
   handleSearchDelete: function (event) {
     var delItem = $(event.target).closest(".searchItem").attr("key");
@@ -88,7 +89,6 @@ var appController = {
     this.getData(name);
   },
   searchSubmit: function (event) {
-    console.log(event.target);
     event.preventDefault();
     var searchData = this.doms.itemName.val();
     this.getData(searchData);
@@ -103,16 +103,11 @@ var appController = {
         console.log(this.movies.Search);
         //aratılan kelimeyi local Storage eklemek için
         this.search(data);
-
-        //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
-        this.doms.movieList.empty();
+        //her axios isteği yapıldıgında input alanı temizlemesini sağlıyor.
         this.doms.itemName.val("");
 
         //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
-        this.movies.forEach((list) => {
-          var movie=this.addItem(list);
-          this.doms.movieList.append(movie);
-        });
+        this.render();
       });
   },
   // forEach ile gelen datanın html eklenmesini sağlıyor.
@@ -158,7 +153,6 @@ var appController = {
     );
     html = html.replace(/%icon%/, isFavorite ? "fas fa-heart" : "far fa-heart");
     return html;
-    
   },
 
   search: function (word) {
@@ -191,12 +185,24 @@ var appController = {
       this.doms.searchList.prepend(html);
     });
   },
+  displayMovieItems: function () {
+    this.doms.movieList.empty();
+    this.movies.forEach((movie) => {
+      var movie = this.addItem(movie);
+      this.doms.movieList.append(movie);
+    });
+  },
   displayFavorites: function () {
     this.doms.favoritesList.empty();
     this.favoritesList.forEach((data) => {
       var item = this.addItem(data);
       this.doms.favoritesList.append(item);
     });
+  },
+  render: function () {
+    this.displaySearchItems();
+    this.displayMovieItems();
+    this.displayFavorites();
   },
 };
 
