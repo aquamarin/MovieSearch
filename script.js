@@ -1,13 +1,3 @@
-var doms = {
-  movieList: $("#movieList"),
-  searchButton: $(".searchButton"),
-  itemName: $("#inputName"),
-  searchList: $(".searchBox"),
-  keyForSearch: "searchWords",
-  keyForFavorites: "favorites",
-  favoriteName: $("#favoritesList"),
-};
-
 // bu fonksiyon localStoragede tutulan ögeler için id oluşturuyor.
 var uuidv4 = function () {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
