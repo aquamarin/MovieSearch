@@ -19,19 +19,7 @@ var storage = {
   },
 };
 
-/* //search inputu için yerteri kadar karakter yazılıp yazılmadığının kontrolu yapılıyor.
-var controlSearchInput = function () {
-  if (doms.itemName.val().length >= 3) {
-    doms.itemName.removeClass("is-danger");
-    return true;
-  } else {
-    doms.itemName.addClass("is-danger");
-    return false;
-  }
-};
-
-// sayfadaki event olaylarının tutulduğu yer
-
+/*
 //sayfa yüklendikten sonra ekelenen ögelerin eventlerini
 //aktif etmek için kullanılan fonksiyon
 var setRecursiveFunc = function () {
@@ -41,7 +29,6 @@ var setRecursiveFunc = function () {
     var Etarget;
     if (isFarOrFas.attr("data-prefix") == "far") {
       isFarOrFas.attr("data-prefix", "fas");
-
       //icona tıklanıp favori listesine eklemnesi için.
       Etarget = $(this).parents(".column");
       var id = uuidv4();
@@ -50,12 +37,10 @@ var setRecursiveFunc = function () {
         div: Etarget,
       };
       favoritesList.push(favorite);
-
       storage.setItem(doms.keyForFavorites, favoritesList);
       //addItem(favoriteName);
     } else {
       isFarOrFas.attr("data-prefix", "far");
-
       //favori listesinden elemanı çıkarmak için
       Etarget = $(this).parents(".column");
       FuncForLocalStorage.deleteItem(
@@ -65,21 +50,7 @@ var setRecursiveFunc = function () {
       );
     }
   });
-
-  // önceden aratılmış olan ögeler listesinden eleman çıkarmak için.
-  $(".closeIcon").click(function () {
-    
-  });
-
-  //önceden aratılmış olan ögeler listesindeki herhangi bir ögeye
-  //tıklandığında tekrar aratılması için
-  $(".box").click(function () {
-    var movieData = $(this).find("p").text().trim();
-    getData(movieData);
-  });
 };
-
-
 
 */
 
@@ -112,12 +83,17 @@ var appController = {
       ".closeIcon",
       this.handleSearchDelete.bind(this)
     );
+    this.doms.searchList.on("click", "p", this.handleSearchClick.bind(this));
   },
   handleSearchDelete: function (event) {
     var delItem = $(event.target).closest(".searchItem").attr("key");
     this.searchItems = this.searchItems.filter((obj) => obj.id !== delItem);
     this.displaySearchItems();
     storage.setItem(this.doms.keyForSearch, this.searchItems);
+  },
+  handleSearchClick: function (event) {
+    var name = $(event.target).text().trim();
+    this.getData(name);
   },
   searchSubmit: function (event) {
     console.log(event.target);
