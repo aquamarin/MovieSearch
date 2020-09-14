@@ -1,13 +1,3 @@
-var doms = {
-  movieList: $("#movieList"),
-  searchButton: $(".searchButton"),
-  itemName: $("#inputName"),
-  searchList: $(".searchBox"),
-  keyForSearch: "searchWords",
-  keyForFavorites: "favorites",
-  favoriteName: $("#favoritesList"),
-};
-
 // bu fonksiyon localStoragede tutulan ögeler için id oluşturuyor.
 var uuidv4 = function () {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -29,7 +19,7 @@ var storage = {
   },
 };
 
-//search inputu için yerteri kadar karakter yazılıp yazılmadığının kontrolu yapılıyor.
+/* //search inputu için yerteri kadar karakter yazılıp yazılmadığının kontrolu yapılıyor.
 var controlSearchInput = function () {
   if (doms.itemName.val().length >= 3) {
     doms.itemName.removeClass("is-danger");
@@ -92,10 +82,95 @@ var setRecursiveFunc = function () {
   });
 };
 
-// forEach ile gelen datanın html eklenmesini sağlıyor.
-var addItem = function (list, data) {
-  var html, newHtml;
-  html = `<div class="column is-3">
+// Search edilen ögelerin görüntülenmesi için.
+var displaySearchItems = function (searchItems) {
+  //aynı ögelerin tekrar etmemesi için display etmeden önce temizliyoruz.
+  doms.searchList.empty();
+  console.log(searchItems);
+  searchItems.forEach(function (item) {
+    var html = `<div key="%key%" class="searchItem box column is-one-quarter">
+          <div class="tile">
+            <p>%name%</p>
+            <span class="closeIcon">
+              <i class="fas fa-times fa-2x"></i>
+            </span>
+          </div>
+        </div>`;
+    html = html.replace(/%key%/, item.id);
+    html = html.replace(/%name%/, item.name);
+    doms.searchList.prepend(html);
+  });
+  setRecursiveFunc();
+};  
+
+var search = function (word) {
+  var search = {
+    id: uuidv4(),
+    name: word,
+  };
+  searchItems.push(search);
+  this.setItem(doms.keyForSearch, searchItems);
+  if (searchItems.length > 10) {
+    console.log(searchItems);
+    searchItems.shift();
+  }
+  displaySearchItems(searchItems);
+};*/
+
+var appController = {
+  init: function () {
+    this.apiKey = "b9af8b2e";
+    this.apiRoot = "http://www.omdbapi.com/";
+    this.movies = [];
+    this.searchItems = storage.getItem("searchList") || [];
+    this.favoritesList = storage.getItem("favoritesList") || [];
+  },
+  onload: function () {
+    this.doms = {
+      searchForm: $("#searchForm"),
+      movieList: $("#movieList"),
+      submit: $("#submit"),
+      itemName: $("#inputName"),
+      searchList: $(".searchBox"),
+      keyForSearch: "searchWords",
+      keyForFavorites: "favorites",
+      favoriteName: $("#favoritesList")
+    };
+    this.bindActions();
+  },
+  bindActions: function () {
+    this.doms.searchForm.on("submit", this.searchSubmit.bind(this));
+  },
+  searchSubmit: function (e) {
+    console.log(e.target);
+    e.preventDefault();
+    var searchData = this.doms.itemName.val();
+    this.getData(searchData);
+  },
+  //inputa yazılan ya da önceden aratılmış kelimelerden seçilen elemana göre apiden axios ile
+  // veriyi alıyoruz
+  getData: function (data) {
+    axios
+      .get(`${this.apiRoot}?s=${data}&apiKey=${this.apiKey}`)
+      .then( (response) => {
+        this.movies = response.data;
+
+        //aratılan kelimeyi local Storage eklemek için
+        //storage.search(data);
+
+        //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
+        this.doms.movieList.empty();
+        this.doms.itemName.val("");
+
+        //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
+        this.movies.Search.forEach( (list)=> {
+          this.addItem(list);
+        });
+      });
+  },
+  // forEach ile gelen datanın html eklenmesini sağlıyor.
+  addItem: function (data) {
+    var html = `<div class="column is-3">
     <div class="card">
       <div class="card-image">
         <figure class="image is-4by5"> 
@@ -119,107 +194,15 @@ var addItem = function (list, data) {
       </div>
     </div>
   </div>`;
+    // eğer datada poster, Poster: "N/A" ise boş gelmemesini sağlıyoruz.
+    html = html.replace(
+      /%poster%/,
+      data.Poster === "N/A" ? "moviePoster.png" : data.Poster
+    );
+    html = html.replace(/%title%/, data.Title);
+    html = html.replace(/%year%/, data.Year);
 
-  // eğer datada poster, Poster: "N/A" ise boş gelmemesini sağlıyoruz.
-  if (data.Poster === "N/A") {
-    newHtml = html.replace(/%poster%/, "moviePoster.png");
-  } else {
-    newHtml = html.replace(/%poster%/, data.Poster);
-  }
-  newHtml = newHtml.replace(/%title%/, data.Title);
-  newHtml = newHtml.replace(/%year%/, data.Year);
-  list.append(newHtml);
-};
-
-/* // Search edilen ögelerin görüntülenmesi için.
-var displaySearchItems = function (searchItems) {
-  //aynı ögelerin tekrar etmemesi için display etmeden önce temizliyoruz.
-  doms.searchList.empty();
-  console.log(searchItems);
-  searchItems.forEach(function (item) {
-    var html = `<div key="%key%" class="searchItem box column is-one-quarter">
-          <div class="tile">
-            <p>%name%</p>
-            <span class="closeIcon">
-              <i class="fas fa-times fa-2x"></i>
-            </span>
-          </div>
-        </div>`;
-    html = html.replace(/%key%/, item.id);
-    html = html.replace(/%name%/, item.name);
-    doms.searchList.prepend(html);
-  });
-  setRecursiveFunc();
-}; */
-
-var search = function (word) {
-  var search = {
-    id: uuidv4(),
-    name: word,
-  };
-  searchItems.push(search);
-  this.setItem(doms.keyForSearch, searchItems);
-  if (searchItems.length > 10) {
-    console.log(searchItems);
-    searchItems.shift();
-  }
-  displaySearchItems(searchItems);
-};
-
-var appController = {
-  init: function () {
-    this.apiKey = "b9af8b2e";
-    this.apiRoot = "http://www.omdbapi.com/";
-    this.movies = [];
-    this.searchItems = storage.getItem("searchList") || [];
-    this.favoritesList = storage.getItem("favoritesList") || [];
-    if (storage.getItem(doms.keyForSearch) !== null) {
-      searchItems = storage.getItem(doms.keyForSearch);
-      //displaySearchItems(searchItems);
-    }
-  },
-  onload: function () {
-    this.doms = {
-      searchForm: $("#searchForm"),
-      movieList: $("#movieList"),
-      submit: $("#submit"),
-      itemName: $("#inputName"),
-      searchList: $(".searchBox"),
-      keyForSearch: "searchWords",
-      keyForFavorites: "favorites",
-      favoriteName: $("#favoritesList"),
-    };
-    this.bindActions();
-  },
-  bindActions: function () {
-    this.doms.searchForm.on("submit", this.searchSubmit.bind(this));
-  },
-  searchSubmit: function (e) {
-    console.log(e.target);
-    e.preventDefault();
-    var searchData = this.doms.itemName.val();
-    this.getData(searchData);
-  },
-  //inputa yazılan ya da önceden aratılmış kelimelerden seçilen elemana göre apiden axios ile
-  // veriyi alıyoruz
-  getData: function (data) {
-    axios
-      .get(`${this.apiRoot}?s=${data}&apiKey=${this.apiKey}`)
-      .then(function (response) {
-         this.movies = response.data;
-
-        //aratılan kelimeyi local Storage eklemek için
-        //storage.search(data);
-
-        //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
-        doms.movieList.empty();
-        doms.itemName.val("");
-
-        //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
-        movies.Search.forEach(function (list) {
-          addItem(doms.movieList, list);
-        });
-      });
+    this.doms.movieList.append(html);
   },
 };
 
@@ -228,3 +211,4 @@ appController.init();
 $(document).ready(function () {
   appController.onload();
 });
+
