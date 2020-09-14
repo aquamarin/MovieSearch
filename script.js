@@ -60,6 +60,7 @@ var appController = {
       ".favorite",
       this.handleFavorite.bind(this)
     );
+    this.doms.itemName.on("keyup", this.handleValidation.bind(this));
   },
   handleFavorite: function (event) {
     var key = $(event.target).closest(".movieItem").attr("key");
@@ -83,6 +84,18 @@ var appController = {
     this.searchItems = this.searchItems.filter((obj) => obj.id !== delItem);
     this.displaySearchItems();
     storage.setItem(this.doms.keyForSearch, this.searchItems);
+  },
+
+  // input alanına mesaj yazılırken controlu sağlıyor
+  handleValidation: function (e) {
+    var text = e.target.value;
+    if (text.length < 3) {
+      this.doms.submit.prop("disabled", true);
+      this.doms.itemName.addClass("is-danger");
+    } else {
+      this.doms.submit.prop("disabled", false);
+      this.doms.itemName.removeClass("is-danger");
+    }
   },
   handleSearchClick: function (event) {
     var name = $(event.target).text().trim();
