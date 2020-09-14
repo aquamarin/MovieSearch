@@ -82,40 +82,9 @@ var setRecursiveFunc = function () {
   });
 };
 
-// Search edilen ögelerin görüntülenmesi için.
-var displaySearchItems = function (searchItems) {
-  //aynı ögelerin tekrar etmemesi için display etmeden önce temizliyoruz.
-  doms.searchList.empty();
-  console.log(searchItems);
-  searchItems.forEach(function (item) {
-    var html = `<div key="%key%" class="searchItem box column is-one-quarter">
-          <div class="tile">
-            <p>%name%</p>
-            <span class="closeIcon">
-              <i class="fas fa-times fa-2x"></i>
-            </span>
-          </div>
-        </div>`;
-    html = html.replace(/%key%/, item.id);
-    html = html.replace(/%name%/, item.name);
-    doms.searchList.prepend(html);
-  });
-  setRecursiveFunc();
-};  
 
-var search = function (word) {
-  var search = {
-    id: uuidv4(),
-    name: word,
-  };
-  searchItems.push(search);
-  this.setItem(doms.keyForSearch, searchItems);
-  if (searchItems.length > 10) {
-    console.log(searchItems);
-    searchItems.shift();
-  }
-  displaySearchItems(searchItems);
-};*/
+
+*/
 
 var appController = {
   init: function () {
@@ -134,7 +103,7 @@ var appController = {
       searchList: $(".searchBox"),
       keyForSearch: "searchWords",
       keyForFavorites: "favorites",
-      favoriteName: $("#favoritesList")
+      favoriteName: $("#favoritesList"),
     };
     this.bindActions();
   },
@@ -152,18 +121,18 @@ var appController = {
   getData: function (data) {
     axios
       .get(`${this.apiRoot}?s=${data}&apiKey=${this.apiKey}`)
-      .then( (response) => {
+      .then((response) => {
         this.movies = response.data;
 
         //aratılan kelimeyi local Storage eklemek için
-        //storage.search(data);
-
+        this.search(data);
+       
         //her axios isteği yapıldıgında input alanı ve sayfanın temizlemesini sağlıyor.
         this.doms.movieList.empty();
         this.doms.itemName.val("");
 
         //api den json olarak gelen verinin her bir ögesinin addItem fonksiyonuna gönderiyoruz.
-        this.movies.Search.forEach( (list)=> {
+        this.movies.Search.forEach((list) => {
           this.addItem(list);
         });
       });
@@ -204,6 +173,38 @@ var appController = {
 
     this.doms.movieList.append(html);
   },
+
+  search: function (word) {
+    var search = {
+      id: uuidv4(),
+      name: word,
+    };
+    this.searchItems.push(search);
+    storage.setItem(this.doms.keyForSearch, this.searchItems);
+    if (this.searchItems.length > 10) {
+      console.log(this.searchItems);
+      this.searchItems.shift();
+    }
+    this.displaySearchItems(this.searchItems);
+  },
+  // Search edilen ögelerin görüntülenmesi için.
+  displaySearchItems: function () {
+    //aynı ögelerin tekrar etmemesi için display etmeden önce temizliyoruz.
+    this.doms.searchList.empty();
+    this.searchItems.forEach((item) => {
+      var html = `<div key="%key%" class="searchItem box column is-one-quarter">
+          <div class="tile">
+            <p>%name%</p>
+            <span class="closeIcon">
+              <i class="fas fa-times fa-2x"></i>
+            </span>
+          </div>
+        </div>`;
+      html = html.replace(/%key%/, item.id);
+      html = html.replace(/%name%/, item.name);
+      this.doms.searchList.prepend(html);
+    });
+  },
 };
 
 appController.init();
@@ -211,4 +212,3 @@ appController.init();
 $(document).ready(function () {
   appController.onload();
 });
-
